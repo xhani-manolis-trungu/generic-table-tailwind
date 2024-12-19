@@ -1,0 +1,132 @@
+<div class="w-full">
+  <!-- Search Bar -->
+  <div class="mb-4" *ngIf="config.showSearch">
+    <input
+      type="text"
+      [(ngModel)]="searchText"
+      placeholder="Search..."
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    />
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto rounded-lg border border-gray-200">
+    <table
+      class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+    >
+      <!-- Header -->
+      <thead class="text-xs text-gray-950 border-b">
+        <tr>
+          <th
+            *ngFor="let column of config.columns"
+            [ngClass]="{
+              'cursor-pointer hover:bg-gray-100': column.sortable
+            }"
+            (click)="sort(column)"
+            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            <div class="flex items-center space-x-1">
+              <span>{{ column.title }}</span>
+              <span *ngIf="column.sortable" class="text-gray-400">
+                <svg
+                  *ngIf="sortColumn !== column.key"
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                  />
+                </svg>
+                <svg
+                  *ngIf="sortColumn === column.key && sortDirection === 'asc'"
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 15l7-7 7 7"
+                  />
+                </svg>
+                <svg
+                  *ngIf="sortColumn === column.key && sortDirection === 'desc'"
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+            </div>
+          </th>
+          <th
+            *ngIf="config.actions"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+
+      <!-- Body -->
+      <tbody>
+        <tr
+          *ngFor="let item of filteredData"
+          (click)="rowClick.emit(item)"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+        >
+          <td
+            *ngFor="let column of config.columns"
+            class="items-center px-4 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+          >
+            <ng-container *ngIf="column.template; else defaultCell">
+              <ng-container
+                *ngTemplateOutlet="
+                  column.template;
+                  context: { $implicit: item, key: column.key }
+                "
+              ></ng-container>
+            </ng-container>
+            <ng-template #defaultCell>
+              {{ getCellValue(item, column) }}
+            </ng-template>
+          </td>
+          <td
+            *ngIf="config.actions"
+            class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+          >
+            <div class="flex space-x-2">
+              <button
+                *ngFor="let action of config.actions"
+                (click)="$event.stopPropagation(); handleAction(action, item)"
+                [class]="
+                  action.buttonClass ||
+                  'px-3 py-1 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700'
+                "
+              >
+                <span *ngIf="action.icon" class="mr-1">
+                  <i [class]="action.icon"></i>
+                </span>
+                {{ action.label }}
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
